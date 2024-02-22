@@ -2,6 +2,7 @@ import pandas as pd
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
 from email import encoders
 from docx import Document
 from docx.shared import Pt
@@ -17,7 +18,7 @@ df = pd.read_excel('planilha.xlsx')
 #Config server email via SMTP
 server = smtplib.SMTP('smtp.gmail.com', 587)
 server.starttls()
-server.login('guga.molino@gmail.com', 'oipqyxgpypwjglla')
+server.login('seuEmail@gmail.com', 'suaSenha') #email e senha do server ttls
 
 def gerarPDF(name):
     doc = Document('basecertificate.docx')
@@ -50,11 +51,20 @@ def RotinaDeEmails():
             os.remove('certificado.pdf')
         if(row['Endereço de e-mail'] != '-------------------------------------------------------' and not pd.isna(row['Endereço de e-mail']) ):
             msg = MIMEMultipart()
-            msg['From'] = 'seu_email@gmail.com'
+            msg['From'] = 'seu_email@gmail.com' #email que envia o certificado
             msg['To'] = row['Endereço de e-mail']
-            msg['Subject'] = 'Aqui está o seu certificado'
+            msg['Subject'] = '| Simpósio de liderança PMESP' #Assunto do email
+
+
+            # Corpo do email
+            corpo_do_email = 'Adicionar corpo do email'
+            msg.attach(MIMEText(corpo_do_email, 'plain')) #Se quiser um corpo mais interessante mudar plain para html e adicionar teste HTML
+
+
             gerarPDF(row['Nome completo'])
             print('O Pdf foi gerado corretamente')
+
+
             # Anexando o certificado
             attachment = open('certificado.pdf', 'rb')
             part = MIMEBase('application', 'octet-stream')
@@ -67,7 +77,7 @@ def RotinaDeEmails():
             email = row['Endereço de e-mail']
             print(f"Iniciando envio do email para '{email}'")
             text = msg.as_string()
-            server.sendmail('guga.molino@gmail.com', row['Endereço de e-mail'], text)
+            server.sendmail('seuEmail@gmail.com', row['Endereço de e-mail'], text) 
             print("Email enviado com sucesso, passando para o próximo valor")
            
             
@@ -75,6 +85,5 @@ def RotinaDeEmails():
 RotinaDeEmails()# Fechando a conexão com o servidor de e-mail
 print("Processo finalizado")
 server.quit()
-# Configurando o servidor de e-mail
 
 
